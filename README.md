@@ -1,2 +1,2 @@
-# JavaBox
-Simple physics simulation
+# JavaSandBox
+Simple physics simulation using swing and AWT
