@@ -13,11 +13,11 @@ import javax.swing.Timer;
 
 public class Main extends JPanel {
 
-    private int HORIZONTAL_CELLS = 10;
+    private int HORIZONTAL_CELLS = 20;
     private int VERTICAL_CELLS = 10;
     private final int SCREEN_WIDTH = 1920;
     private final int SCREEN_HEIGHT = 1080;
-    private final int FPS = 120;
+    private final int FPS = 1000;
 
     private final boolean PrintDebugInfo = true;
 
@@ -27,6 +27,7 @@ public class Main extends JPanel {
     private final Image LavaSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/lava.png").getImage();
     private final Image WaterSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/water.png").getImage();
     private final Image NothingSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/nothing.png").getImage();
+    private final Image ClearSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/clear.png").getImage();
 
     private final Image SelectedBorderSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/SelectedElement.png").getImage();
 
@@ -191,6 +192,7 @@ public class Main extends JPanel {
 
     private void DrawElementMenu() {
         int MenuOffsetX = 2;
+        graphics.drawImage(ClearSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * -1, this);
         graphics.drawImage(SandSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize, this);
         graphics.drawImage(WaterSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * 3, this);
         graphics.drawImage(LavaSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * 5, this);
@@ -207,6 +209,12 @@ public class Main extends JPanel {
         int MenuOffsetX = 2;
         if (ClickedX > OffsetX - SpriteSize * MenuOffsetX && ClickedX < (OffsetX - SpriteSize * MenuOffsetX) + SpriteSize) {
 
+            if (ClickedY > OffsetY + SpriteSize * -1 && ClickedY < OffsetY) {
+                System.out.println("Cleared");
+                FieldBuffer[0][0] = null;
+                initFieldBuffer();
+                initField();
+            }
             if (ClickedY > OffsetY + SpriteSize && ClickedY < OffsetY + SpriteSize * 2) {
                 System.out.println("Sand selected");
                 ShowSelectedElement(SandSprite);
@@ -259,9 +267,11 @@ public class Main extends JPanel {
         if (sprite == LavaSprite) {
             return "Lava";
         }
-
         if (sprite == NothingSprite) {
             return "Air";
+        }
+        if (sprite == ClearSprite) {
+            return "Clear";
         }
         return "Unknown";
     }
@@ -387,17 +397,23 @@ public class Main extends JPanel {
                 } else if (inBounds(UpdateX - 1, UpdateY + 1) && FieldBuffer[UpdateX - 1][UpdateY + 1] == AirSprite) {
                     FieldBuffer[UpdateX][UpdateY] = AirSprite;
                     FieldBuffer[UpdateX - 1][UpdateY + 1] = LavaSprite;
-                } else if (inBounds(UpdateX - 1, UpdateY) && FieldBuffer[UpdateX - 1][UpdateY] == AirSprite && LavaCheckingRight) {
-                    FieldBuffer[UpdateX][UpdateY] = AirSprite;
-                    FieldBuffer[UpdateX - 1][UpdateY] = LavaSprite;
-                } else if (inBounds(UpdateX + 1, UpdateY) && FieldBuffer[UpdateX + 1][UpdateY] == AirSprite) {
-                    LavaCheckingRight = false;
-                    FieldBuffer[UpdateX][UpdateY] = AirSprite;
-                    FieldBuffer[UpdateX + 1][UpdateY] = LavaSprite;
                 } else {
-                    LavaCheckingRight = true;
+                    int random = (int) (Math.random() * 2);
+                    if (random == 1) {
+                        if (inBounds(UpdateX - 1, UpdateY) && FieldBuffer[UpdateX - 1][UpdateY] == AirSprite) {
+                            FieldBuffer[UpdateX][UpdateY] = AirSprite;
+                            FieldBuffer[UpdateX - 1][UpdateY] = LavaSprite;
+                        }
+                    } else {
+                        if (inBounds(UpdateX + 1, UpdateY) && FieldBuffer[UpdateX + 1][UpdateY] == AirSprite) {
+                            FieldBuffer[UpdateX][UpdateY] = AirSprite;
+                            FieldBuffer[UpdateX + 1][UpdateY] = LavaSprite;
+                        }
+                    }
                 }
+
             }
+
         }
 
         UpdateX++;
