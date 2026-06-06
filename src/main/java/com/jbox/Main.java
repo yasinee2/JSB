@@ -33,10 +33,7 @@ public class Main extends JPanel {
     private final int FieldWidth = SpriteSize * HORIZONTAL_CELLS;
     private final int FieldHeight = SpriteSize * VERTICAL_CELLS;
     private Image SelectedElement = NothingSprite;
-    private boolean HasFieldbeenDrawn = false;
-
-    private int clickedX;
-    private int clickedY;
+    private Image[][] FieldBuffer = new Image[HORIZONTAL_CELLS][VERTICAL_CELLS];
 
     private final int OffsetY = (SCREEN_HEIGHT - FieldHeight) / 2;
     private final int OffsetX = (SCREEN_WIDTH - FieldWidth) / 2; //DOES: Cords for placing the grid in the middle of the screen
@@ -50,21 +47,23 @@ public class Main extends JPanel {
         //frame.setSize(500, 500);
         frame.setTitle("JavaSandBox");
         frame.setVisible(true);
+
     }
 
     @Override
     protected void paintComponent(Graphics graphics) {
         this.graphics = graphics;
         super.paintComponent(graphics);
-        graphics.setColor(Color.BLACK); // Hintergrund färben
+        graphics.setColor(Color.BLACK); //IS: BG color
         graphics.fillRect(0, 0, getWidth(), getHeight());
+        initFieldBuffer();
         initField();
         DrawElementMenu();
+
     }
 
     private Main() {
-        HORIZONTAL_CELLS += 1;
-        VERTICAL_CELLS += 1;
+
         if (PrintDebugInfo) {
             System.out.println("    Debug info:      ");
             System.out.println("    Screen width:" + SCREEN_WIDTH);
@@ -81,9 +80,24 @@ public class Main extends JPanel {
         initMouseListener();
     }
 
-    private void initField() {
+    private void initFieldBuffer() {
+        if (FieldBuffer[0][0] == null) {
+            int x = 0;
+            int y = 0;
 
-        //int firstCellPosY = (SCREEN_HEIGHT - FieldHeight) / 2;
+            for (int i = 0; i < HORIZONTAL_CELLS * VERTICAL_CELLS; i++) {
+                if (x >= HORIZONTAL_CELLS) {
+                    y++;
+                    x = 0;
+                }
+                FieldBuffer[x][y] = AirSprite;
+                x++;
+            }
+        }
+
+    }
+
+    private void initField() {
         int y = 0;
         int x = 0;
         for (int i = 0; i < HORIZONTAL_CELLS * VERTICAL_CELLS; i++) {
@@ -91,7 +105,7 @@ public class Main extends JPanel {
                 y++;
                 x = 0;
             }
-            graphics.drawImage(AirSprite, x * SpriteSize + OffsetX, y * SpriteSize + OffsetY, this);
+            graphics.drawImage(FieldBuffer[x][y], x * SpriteSize + OffsetX, y * SpriteSize + OffsetY, this);
             x++;
         }
 
@@ -126,8 +140,9 @@ public class Main extends JPanel {
                     if (ClickedX > x * SpriteSize + OffsetX && ClickedX < (x * SpriteSize + OffsetX) + SpriteSize) {
 
                         if (ClickedY > (y * SpriteSize) + OffsetY && ClickedY < ((y + 1) * SpriteSize) + OffsetY) {
+                            PlaceElement(x, y);
                             if (PrintDebugInfo) {
-                                System.out.println("ClickCell: " + y + ", " + x);
+                                System.out.println("ClickedCell: " + y + ", " + x);
                             }
                         }
                     }
@@ -182,6 +197,15 @@ public class Main extends JPanel {
 
     private void ShowSelectedElement(Image SpriteOfElement) {
         SelectedElement = SpriteOfElement;
+        repaint();
+    }
+
+    private void PlaceElement(int CellPosX, int CellPosY) {
+        if (SelectedElement == NothingSprite) {
+            FieldBuffer[CellPosX][CellPosY] = AirSprite;
+        } else {
+            FieldBuffer[CellPosX][CellPosY] = SelectedElement;
+        }
         repaint();
     }
 }
