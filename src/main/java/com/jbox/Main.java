@@ -331,15 +331,22 @@ public class Main extends JPanel {
             } else if (inBounds(UpdateX - 1, UpdateY + 1) && FieldBuffer[UpdateX - 1][UpdateY + 1] == AirSprite) {
                 FieldBuffer[UpdateX][UpdateY] = AirSprite;
                 FieldBuffer[UpdateX - 1][UpdateY + 1] = WaterSprite;
-            } else if (inBounds(UpdateX - 1, UpdateY) && FieldBuffer[UpdateX - 1][UpdateY] == AirSprite && !WaterCheckingRight) {
-                FieldBuffer[UpdateX][UpdateY] = AirSprite;
-                FieldBuffer[UpdateX - 1][UpdateY] = WaterSprite;
-            } else if (inBounds(UpdateX + 1, UpdateY) && FieldBuffer[UpdateX + 1][UpdateY] == AirSprite) {
-                WaterCheckingRight = true;
-                FieldBuffer[UpdateX][UpdateY] = AirSprite;
-                FieldBuffer[UpdateX + 1][UpdateY] = WaterSprite;
+
             } else {
-                WaterCheckingRight = false;
+                int randomW = (int) (Math.random() * 2);
+                if (randomW == 1) {
+                    if (inBounds(UpdateX - 1, UpdateY) && FieldBuffer[UpdateX - 1][UpdateY] == AirSprite) {
+                        FieldBuffer[UpdateX][UpdateY] = AirSprite;
+                        FieldBuffer[UpdateX - 1][UpdateY] = WaterSprite;
+                    }
+                } else {
+                    if (inBounds(UpdateX + 1, UpdateY) && FieldBuffer[UpdateX + 1][UpdateY] == AirSprite) {
+                        WaterCheckingRight = true;
+                        FieldBuffer[UpdateX][UpdateY] = AirSprite;
+                        FieldBuffer[UpdateX + 1][UpdateY] = WaterSprite;
+                    }
+
+                }
             }
 
             //DOES: replaces nearbUpdateY lava
