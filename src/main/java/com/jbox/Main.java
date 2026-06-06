@@ -23,7 +23,6 @@ public class Main extends JPanel {
 
     private final Image AirSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/emptyCell.png").getImage();
     private final Image SandSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/sand.png").getImage();
-    private final Image IronSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/iron.png").getImage();
     private final Image StoneSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/stone.png").getImage();
     private final Image LavaSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/lava.png").getImage();
     private final Image WaterSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/water.png").getImage();
@@ -189,7 +188,6 @@ public class Main extends JPanel {
 
     private void DrawElementMenu() {
         int MenuOffsetX = 2;
-        graphics.drawImage(IronSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * -1, this);
         graphics.drawImage(SandSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize, this);
         graphics.drawImage(WaterSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * 3, this);
         graphics.drawImage(LavaSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * 5, this);
@@ -206,10 +204,6 @@ public class Main extends JPanel {
         int MenuOffsetX = 2;
         if (ClickedX > OffsetX - SpriteSize * MenuOffsetX && ClickedX < (OffsetX - SpriteSize * MenuOffsetX) + SpriteSize) {
 
-            if (ClickedY > OffsetY + SpriteSize * -1 && ClickedY < OffsetY + SpriteSize * 0) {
-                System.out.println("Iron selected");
-                ShowSelectedElement(IronSprite);
-            }
             if (ClickedY > OffsetY + SpriteSize && ClickedY < OffsetY + SpriteSize * 2) {
                 System.out.println("Sand selected");
                 ShowSelectedElement(SandSprite);
@@ -262,9 +256,7 @@ public class Main extends JPanel {
         if (sprite == LavaSprite) {
             return "Lava";
         }
-        if (sprite == IronSprite) {
-            return "Iron";
-        }
+
         if (sprite == NothingSprite) {
             return "Air";
         }
@@ -288,125 +280,113 @@ public class Main extends JPanel {
                 y++;
                 x = 0;
             }
-            try {
-                //DOES: logic for stone
-                if (FieldBuffer[x][y] == StoneSprite) {
-                    if (FieldBuffer[x][y + 1] == AirSprite) {
-                        FieldBuffer[x][y] = AirSprite;
-                        FieldBuffer[x][y + 1] = StoneSprite;
 
-                    } else if (FieldBuffer[x][y + 1] == LavaSprite) {
-                        FieldBuffer[x][y] = LavaSprite;
-                        FieldBuffer[x][y + 1] = StoneSprite;
-
-                    } else if (FieldBuffer[x][y + 1] == WaterSprite) {
-                        FieldBuffer[x][y] = WaterSprite;
-                        FieldBuffer[x][y + 1] = StoneSprite;
-                    }
+            //DOES: Logic for sand
+            if (FieldBuffer[x][y] == SandSprite) {
+                if (inBounds(x, y + 1) && FieldBuffer[x][y + 1] == AirSprite) {
+                    FieldBuffer[x][y] = AirSprite;
+                    FieldBuffer[x][y + 1] = SandSprite;
+                } else if (inBounds(x + 1, y + 1) && FieldBuffer[x + 1][y + 1] == AirSprite) {
+                    FieldBuffer[x][y] = AirSprite;
+                    FieldBuffer[x + 1][y + 1] = SandSprite;
+                } else if (inBounds(x - 1, y + 1) && FieldBuffer[x - 1][y + 1] == AirSprite) {
+                    FieldBuffer[x][y] = AirSprite;
+                    FieldBuffer[x - 1][y + 1] = SandSprite;
                 }
-                //DOES: Logic for sand
-                if (FieldBuffer[x][y] == SandSprite) {
-                    if (FieldBuffer[x][y + 1] == AirSprite) {
-                        FieldBuffer[x][y] = AirSprite;
-                        FieldBuffer[x][y + 1] = SandSprite;
-
-                    } else if (FieldBuffer[x + 1][y + 1] == AirSprite) {
-                        FieldBuffer[x][y] = AirSprite;
-                        FieldBuffer[x + 1][y + 1] = SandSprite;
-
-                    } else if (FieldBuffer[x - 1][y + 1] == AirSprite) {
-                        FieldBuffer[x][y] = AirSprite;
-                        FieldBuffer[x - 1][y + 1] = SandSprite;
-                    }
-                    //DOES: Replaces water
-                    if (FieldBuffer[x][y + 1] == WaterSprite) {
-                        FieldBuffer[x][y] = WaterSprite;
-                        FieldBuffer[x][y + 1] = SandSprite;
-
-                    } else if (FieldBuffer[x + 1][y + 1] == WaterSprite) {
-                        FieldBuffer[x][y] = WaterSprite;
-                        FieldBuffer[x + 1][y + 1] = SandSprite;
-
-                    } else if (FieldBuffer[x - 1][y + 1] == WaterSprite) {
-                        FieldBuffer[x][y] = WaterSprite;
-                        FieldBuffer[x - 1][y + 1] = SandSprite;
-                    }
+                //DOES: Replaces water
+                if (inBounds(x, y + 1) && FieldBuffer[x][y + 1] == WaterSprite) {
+                    FieldBuffer[x][y] = WaterSprite;
+                    FieldBuffer[x][y + 1] = SandSprite;
+                } else if (inBounds(x + 1, y + 1) && FieldBuffer[x + 1][y + 1] == WaterSprite) {
+                    FieldBuffer[x][y] = WaterSprite;
+                    FieldBuffer[x + 1][y + 1] = SandSprite;
+                } else if (inBounds(x - 1, y + 1) && FieldBuffer[x - 1][y + 1] == WaterSprite) {
+                    FieldBuffer[x][y] = WaterSprite;
+                    FieldBuffer[x - 1][y + 1] = SandSprite;
                 }
-                //DOES: Logic for water
-                if (FieldBuffer[x][y] == WaterSprite) {
-                    if (FieldBuffer[x][y + 1] == AirSprite) {
-                        FieldBuffer[x][y] = AirSprite;
-                        FieldBuffer[x][y + 1] = WaterSprite;
+            }
 
-                    } else if (FieldBuffer[x + 1][y + 1] == AirSprite) {
-                        FieldBuffer[x][y] = AirSprite;
-                        FieldBuffer[x + 1][y + 1] = WaterSprite;
-
-                    } else if (FieldBuffer[x - 1][y + 1] == AirSprite) {
-                        FieldBuffer[x][y] = AirSprite;
-                        FieldBuffer[x - 1][y + 1] = WaterSprite;
-
-                    } else if (FieldBuffer[x - 1][y] == AirSprite && WaterCheckingRight == false) {
-                        FieldBuffer[x][y] = AirSprite;
-                        FieldBuffer[x - 1][y] = WaterSprite;
-
-                    } else if (FieldBuffer[x + 1][y] == AirSprite) {
-                        WaterCheckingRight = true;
-                        FieldBuffer[x][y] = AirSprite;
-                        FieldBuffer[x + 1][y] = WaterSprite;
-                    } else {
-                        WaterCheckingRight = false;
-                    }
-
-                    //DOES: replaces nearby lava
-                    if (FieldBuffer[x][y + 1] == LavaSprite) {
-                        FieldBuffer[x][y + 1] = StoneSprite;
-                    }
-                    if (FieldBuffer[x][y - 1] == LavaSprite) {
-                        FieldBuffer[x][y - 1] = StoneSprite;
-                    }
-                    if (FieldBuffer[x + 1][y] == LavaSprite) {
-                        FieldBuffer[x + 1][y] = StoneSprite;
-                    }
-                    if (FieldBuffer[x - 1][y] == LavaSprite) {
-                        FieldBuffer[x - 1][y] = StoneSprite;
-                    }
+            //DOES: Logic for water
+            if (FieldBuffer[x][y] == WaterSprite) {
+                if (inBounds(x, y + 1) && FieldBuffer[x][y + 1] == AirSprite) {
+                    FieldBuffer[x][y] = AirSprite;
+                    FieldBuffer[x][y + 1] = WaterSprite;
+                } else if (inBounds(x + 1, y + 1) && FieldBuffer[x + 1][y + 1] == AirSprite) {
+                    FieldBuffer[x][y] = AirSprite;
+                    FieldBuffer[x + 1][y + 1] = WaterSprite;
+                } else if (inBounds(x - 1, y + 1) && FieldBuffer[x - 1][y + 1] == AirSprite) {
+                    FieldBuffer[x][y] = AirSprite;
+                    FieldBuffer[x - 1][y + 1] = WaterSprite;
+                } else if (inBounds(x - 1, y) && FieldBuffer[x - 1][y] == AirSprite && !WaterCheckingRight) {
+                    FieldBuffer[x][y] = AirSprite;
+                    FieldBuffer[x - 1][y] = WaterSprite;
+                } else if (inBounds(x + 1, y) && FieldBuffer[x + 1][y] == AirSprite) {
+                    WaterCheckingRight = true;
+                    FieldBuffer[x][y] = AirSprite;
+                    FieldBuffer[x + 1][y] = WaterSprite;
+                } else {
+                    WaterCheckingRight = false;
                 }
 
-                //DOES: Logic for lava
-                if (FieldBuffer[x][y] == LavaSprite) {
-                    //DOES:Replaces lava with stone if water is its neighbor
-                    if (FieldBuffer[x][y + 1] == WaterSprite) {
-                        FieldBuffer[x][y] = StoneSprite;
-                    }
-                    if (FieldBuffer[x][y - 1] == WaterSprite) {
-                        FieldBuffer[x][y] = StoneSprite;
-                    }
-                    if (FieldBuffer[x + 1][y] == WaterSprite) {
-                        FieldBuffer[x][y] = StoneSprite;
-                    }
-                    if (FieldBuffer[x - 1][y] == WaterSprite) {
-                        FieldBuffer[x][y] = StoneSprite;
-                    }
+                //DOES: replaces nearby lava
+                if (inBounds(x, y + 1) && FieldBuffer[x][y + 1] == LavaSprite) {
+                    FieldBuffer[x][y + 1] = StoneSprite;
+                }
+                if (inBounds(x, y - 1) && FieldBuffer[x][y - 1] == LavaSprite) {
+                    FieldBuffer[x][y - 1] = StoneSprite;
+                }
+                if (inBounds(x + 1, y) && FieldBuffer[x + 1][y] == LavaSprite) {
+                    FieldBuffer[x + 1][y] = StoneSprite;
+                }
+                if (inBounds(x - 1, y) && FieldBuffer[x - 1][y] == LavaSprite) {
+                    FieldBuffer[x - 1][y] = StoneSprite;
+                }
+            }
 
-                    //DOES: Normal logic
-                    if (FieldBuffer[x][y + 1] == AirSprite) {
+            //DOES: Logic for lava
+            if (FieldBuffer[x][y] == LavaSprite) {
+                //DOES: Replaces lava with stone if water is its neighbor
+                if (inBounds(x, y + 1) && FieldBuffer[x][y + 1] == WaterSprite) {
+                    FieldBuffer[x][y] = StoneSprite;
+                }
+                if (inBounds(x, y - 1) && FieldBuffer[x][y - 1] == WaterSprite) {
+                    FieldBuffer[x][y] = StoneSprite;
+                }
+                if (inBounds(x + 1, y) && FieldBuffer[x + 1][y] == WaterSprite) {
+                    FieldBuffer[x][y] = StoneSprite;
+                }
+                if (inBounds(x - 1, y) && FieldBuffer[x - 1][y] == WaterSprite) {
+                    FieldBuffer[x][y] = StoneSprite;
+                }
+                //DOES: Replaces sand with lava if water is its neighbor
+                if (inBounds(x, y + 1) && FieldBuffer[x][y + 1] == SandSprite) {
+                    FieldBuffer[x][y + 1] = LavaSprite;
+                }
+                if (inBounds(x, y - 1) && FieldBuffer[x][y - 1] == SandSprite) {
+                    FieldBuffer[x][y - 1] = LavaSprite;
+                }
+                if (inBounds(x + 1, y) && FieldBuffer[x + 1][y] == SandSprite) {
+                    FieldBuffer[x + 1][y] = LavaSprite;
+                }
+                if (inBounds(x - 1, y) && FieldBuffer[x - 1][y] == SandSprite) {
+                    FieldBuffer[x - 1][y] = LavaSprite;
+                }
+
+                //DOES: Normal logic
+                if (FieldBuffer[x][y] == LavaSprite) { // nochmal prüfen falls oben zu stone wurde
+                    if (inBounds(x, y + 1) && FieldBuffer[x][y + 1] == AirSprite) {
                         FieldBuffer[x][y] = AirSprite;
                         FieldBuffer[x][y + 1] = LavaSprite;
-
-                    } else if (FieldBuffer[x + 1][y + 1] == AirSprite) {
+                    } else if (inBounds(x + 1, y + 1) && FieldBuffer[x + 1][y + 1] == AirSprite) {
                         FieldBuffer[x][y] = AirSprite;
                         FieldBuffer[x + 1][y + 1] = LavaSprite;
-
-                    } else if (FieldBuffer[x - 1][y + 1] == AirSprite) {
+                    } else if (inBounds(x - 1, y + 1) && FieldBuffer[x - 1][y + 1] == AirSprite) {
                         FieldBuffer[x][y] = AirSprite;
                         FieldBuffer[x - 1][y + 1] = LavaSprite;
-
-                    } else if (FieldBuffer[x - 1][y] == AirSprite && LavaCheckingRight == true) {
+                    } else if (inBounds(x - 1, y) && FieldBuffer[x - 1][y] == AirSprite && LavaCheckingRight) {
                         FieldBuffer[x][y] = AirSprite;
                         FieldBuffer[x - 1][y] = LavaSprite;
-
-                    } else if (FieldBuffer[x + 1][y] == AirSprite) {
+                    } else if (inBounds(x + 1, y) && FieldBuffer[x + 1][y] == AirSprite) {
                         LavaCheckingRight = false;
                         FieldBuffer[x][y] = AirSprite;
                         FieldBuffer[x + 1][y] = LavaSprite;
@@ -414,11 +394,15 @@ public class Main extends JPanel {
                         LavaCheckingRight = true;
                     }
                 }
-            } catch (Exception e) {
             }
+
             x++;
         }
 
         repaint();
+    }
+
+    private boolean inBounds(int x, int y) {
+        return x >= 0 && x < HORIZONTAL_CELLS && y >= 0 && y < VERTICAL_CELLS;
     }
 }
