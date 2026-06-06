@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 public class Main extends JPanel {
 
@@ -16,10 +17,13 @@ public class Main extends JPanel {
     private int VERTICAL_CELLS = 10;
     private final int SCREEN_WIDTH = 1920;
     private final int SCREEN_HEIGHT = 1080;
+    private final int FPS = 15;
+
     private final boolean PrintDebugInfo = true;
 
     private final Image AirSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/emptyCell.png").getImage();
     private final Image SandSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/sand.png").getImage();
+    private final Image IronSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/iron.png").getImage();
     private final Image StoneSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/stone.png").getImage();
     private final Image LavaSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/lava.png").getImage();
     private final Image WaterSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/water.png").getImage();
@@ -34,6 +38,9 @@ public class Main extends JPanel {
     private final int FieldHeight = SpriteSize * VERTICAL_CELLS;
     private Image SelectedElement = NothingSprite;
     private Image[][] FieldBuffer = new Image[HORIZONTAL_CELLS][VERTICAL_CELLS];
+    private boolean isMousePressed = false;
+    private int[] lastClickedCellPos = new int[2];
+    private boolean isClickInField = false;
 
     private final int OffsetY = (SCREEN_HEIGHT - FieldHeight) / 2;
     private final int OffsetX = (SCREEN_WIDTH - FieldWidth) / 2; //DOES: Cords for placing the grid in the middle of the screen
@@ -54,11 +61,14 @@ public class Main extends JPanel {
     protected void paintComponent(Graphics graphics) {
         this.graphics = graphics;
         super.paintComponent(graphics);
-        graphics.setColor(Color.BLACK); //IS: BG color
+        graphics.setColor(Color.BLACK);
         graphics.fillRect(0, 0, getWidth(), getHeight());
         initFieldBuffer();
         initField();
         DrawElementMenu();
+
+        graphics.setColor(Color.WHITE);
+        graphics.drawString("Selected: " + getSpriteName(SelectedElement), OffsetX, OffsetY - 10);
 
     }
 
@@ -76,6 +86,11 @@ public class Main extends JPanel {
             System.out.println("");
 
         }
+
+        Timer timer = new Timer(1000 / FPS, e -> {
+            tick();
+        });
+        timer.start();
 
         initMouseListener();
     }
@@ -114,14 +129,26 @@ public class Main extends JPanel {
     private void initMouseListener() {
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                if (PrintDebugInfo) {
-                    System.out.println("ClickedPos: " + e.getX() + ", " + e.getY());
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    isMousePressed = true;
+                    FieldClickHandler(e.getX(), e.getY());
+                    MenuClickHandler(e.getX(), e.getY());
                 }
+            }
 
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    isMousePressed = false;
+                }
+            }
+        });
+
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
                 FieldClickHandler(e.getX(), e.getY());
-                MenuClickHandler(e.getX(), e.getY());
-
             }
         });
     }
@@ -132,6 +159,7 @@ public class Main extends JPanel {
         int x = 0;
         if (ClickedX > OffsetX && ClickedX < OffsetX + FieldWidth) { //DOES: Checks if the click is in the grid
             if (ClickedY > OffsetY && ClickedY < OffsetY + FieldHeight) {//DOES:-------------------------------
+                isClickInField = true;
                 for (int i = 0; i < HORIZONTAL_CELLS * VERTICAL_CELLS; i++) {
                     if (x >= HORIZONTAL_CELLS) {
                         y++;
@@ -140,7 +168,9 @@ public class Main extends JPanel {
                     if (ClickedX > x * SpriteSize + OffsetX && ClickedX < (x * SpriteSize + OffsetX) + SpriteSize) {
 
                         if (ClickedY > (y * SpriteSize) + OffsetY && ClickedY < ((y + 1) * SpriteSize) + OffsetY) {
-                            PlaceElement(x, y);
+
+                            lastClickedCellPos[0] = x;
+                            lastClickedCellPos[1] = y;
                             if (PrintDebugInfo) {
                                 System.out.println("ClickedCell: " + y + ", " + x);
                             }
@@ -148,14 +178,18 @@ public class Main extends JPanel {
                     }
                     x++;
                 }
-
+            } else {
+                isClickInField = false;
             }
+        } else {
+            isClickInField = false;
         }
 
     }
 
     private void DrawElementMenu() {
         int MenuOffsetX = 2;
+        graphics.drawImage(IronSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * -1, this);
         graphics.drawImage(SandSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize, this);
         graphics.drawImage(WaterSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * 3, this);
         graphics.drawImage(LavaSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * 5, this);
@@ -172,6 +206,10 @@ public class Main extends JPanel {
         int MenuOffsetX = 2;
         if (ClickedX > OffsetX - SpriteSize * MenuOffsetX && ClickedX < (OffsetX - SpriteSize * MenuOffsetX) + SpriteSize) {
 
+            if (ClickedY > OffsetY + SpriteSize * -1 && ClickedY < OffsetY + SpriteSize * 0) {
+                System.out.println("Iron selected");
+                ShowSelectedElement(IronSprite);
+            }
             if (ClickedY > OffsetY + SpriteSize && ClickedY < OffsetY + SpriteSize * 2) {
                 System.out.println("Sand selected");
                 ShowSelectedElement(SandSprite);
@@ -196,6 +234,7 @@ public class Main extends JPanel {
     }
 
     private void ShowSelectedElement(Image SpriteOfElement) {
+
         SelectedElement = SpriteOfElement;
         repaint();
     }
@@ -206,6 +245,180 @@ public class Main extends JPanel {
         } else {
             FieldBuffer[CellPosX][CellPosY] = SelectedElement;
         }
+        repaint();
+
+    }
+
+    private String getSpriteName(Image sprite) {
+        if (sprite == SandSprite) {
+            return "Sand";
+        }
+        if (sprite == StoneSprite) {
+            return "Stone";
+        }
+        if (sprite == WaterSprite) {
+            return "Water";
+        }
+        if (sprite == LavaSprite) {
+            return "Lava";
+        }
+        if (sprite == IronSprite) {
+            return "Iron";
+        }
+        if (sprite == NothingSprite) {
+            return "Air";
+        }
+        return "Unknown";
+    }
+
+    private void tick() {
+        if (isMousePressed == true && isClickInField == true) {
+            PlaceElement(lastClickedCellPos[0], lastClickedCellPos[1]);
+        }
+        UpdateGame();
+    }
+
+    private void UpdateGame() {
+        boolean WaterCheckingRight = false;
+        boolean LavaCheckingRight = true;
+        int x = 0;
+        int y = 0;
+        for (int i = 0; i < HORIZONTAL_CELLS * VERTICAL_CELLS; i++) {
+            if (x >= HORIZONTAL_CELLS) {
+                y++;
+                x = 0;
+            }
+            try {
+                //DOES: logic for stone
+                if (FieldBuffer[x][y] == StoneSprite) {
+                    if (FieldBuffer[x][y + 1] == AirSprite) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x][y + 1] = StoneSprite;
+
+                    } else if (FieldBuffer[x][y + 1] == LavaSprite) {
+                        FieldBuffer[x][y] = LavaSprite;
+                        FieldBuffer[x][y + 1] = StoneSprite;
+
+                    } else if (FieldBuffer[x][y + 1] == WaterSprite) {
+                        FieldBuffer[x][y] = WaterSprite;
+                        FieldBuffer[x][y + 1] = StoneSprite;
+                    }
+                }
+                //DOES: Logic for sand
+                if (FieldBuffer[x][y] == SandSprite) {
+                    if (FieldBuffer[x][y + 1] == AirSprite) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x][y + 1] = SandSprite;
+
+                    } else if (FieldBuffer[x + 1][y + 1] == AirSprite) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x + 1][y + 1] = SandSprite;
+
+                    } else if (FieldBuffer[x - 1][y + 1] == AirSprite) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x - 1][y + 1] = SandSprite;
+                    }
+                    //DOES: Replaces water
+                    if (FieldBuffer[x][y + 1] == WaterSprite) {
+                        FieldBuffer[x][y] = WaterSprite;
+                        FieldBuffer[x][y + 1] = SandSprite;
+
+                    } else if (FieldBuffer[x + 1][y + 1] == WaterSprite) {
+                        FieldBuffer[x][y] = WaterSprite;
+                        FieldBuffer[x + 1][y + 1] = SandSprite;
+
+                    } else if (FieldBuffer[x - 1][y + 1] == WaterSprite) {
+                        FieldBuffer[x][y] = WaterSprite;
+                        FieldBuffer[x - 1][y + 1] = SandSprite;
+                    }
+                }
+                //DOES: Logic for water
+                if (FieldBuffer[x][y] == WaterSprite) {
+                    if (FieldBuffer[x][y + 1] == AirSprite) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x][y + 1] = WaterSprite;
+
+                    } else if (FieldBuffer[x + 1][y + 1] == AirSprite) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x + 1][y + 1] = WaterSprite;
+
+                    } else if (FieldBuffer[x - 1][y + 1] == AirSprite) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x - 1][y + 1] = WaterSprite;
+
+                    } else if (FieldBuffer[x - 1][y] == AirSprite && WaterCheckingRight == false) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x - 1][y] = WaterSprite;
+
+                    } else if (FieldBuffer[x + 1][y] == AirSprite) {
+                        WaterCheckingRight = true;
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x + 1][y] = WaterSprite;
+                    } else {
+                        WaterCheckingRight = false;
+                    }
+
+                    //DOES: replaces nearby lava
+                    if (FieldBuffer[x][y + 1] == LavaSprite) {
+                        FieldBuffer[x][y + 1] = StoneSprite;
+                    }
+                    if (FieldBuffer[x][y - 1] == LavaSprite) {
+                        FieldBuffer[x][y - 1] = StoneSprite;
+                    }
+                    if (FieldBuffer[x + 1][y] == LavaSprite) {
+                        FieldBuffer[x + 1][y] = StoneSprite;
+                    }
+                    if (FieldBuffer[x - 1][y] == LavaSprite) {
+                        FieldBuffer[x - 1][y] = StoneSprite;
+                    }
+                }
+
+                //DOES: Logic for lava
+                if (FieldBuffer[x][y] == LavaSprite) {
+                    //DOES:Replaces lava with stone if water is its neighbor
+                    if (FieldBuffer[x][y + 1] == WaterSprite) {
+                        FieldBuffer[x][y] = StoneSprite;
+                    }
+                    if (FieldBuffer[x][y - 1] == WaterSprite) {
+                        FieldBuffer[x][y] = StoneSprite;
+                    }
+                    if (FieldBuffer[x + 1][y] == WaterSprite) {
+                        FieldBuffer[x][y] = StoneSprite;
+                    }
+                    if (FieldBuffer[x - 1][y] == WaterSprite) {
+                        FieldBuffer[x][y] = StoneSprite;
+                    }
+
+                    //DOES: Normal logic
+                    if (FieldBuffer[x][y + 1] == AirSprite) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x][y + 1] = LavaSprite;
+
+                    } else if (FieldBuffer[x + 1][y + 1] == AirSprite) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x + 1][y + 1] = LavaSprite;
+
+                    } else if (FieldBuffer[x - 1][y + 1] == AirSprite) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x - 1][y + 1] = LavaSprite;
+
+                    } else if (FieldBuffer[x - 1][y] == AirSprite && LavaCheckingRight == true) {
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x - 1][y] = LavaSprite;
+
+                    } else if (FieldBuffer[x + 1][y] == AirSprite) {
+                        LavaCheckingRight = false;
+                        FieldBuffer[x][y] = AirSprite;
+                        FieldBuffer[x + 1][y] = LavaSprite;
+                    } else {
+                        LavaCheckingRight = true;
+                    }
+                }
+            } catch (Exception e) {
+            }
+            x++;
+        }
+
         repaint();
     }
 }
