@@ -16,18 +16,29 @@ public class Main extends JPanel {
     private int VERTICAL_CELLS = 10;
     private final int SCREEN_WIDTH = 1920;
     private final int SCREEN_HEIGHT = 1080;
+    private final boolean PrintDebugInfo = true;
 
+    private final Image AirSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/emptyCell.png").getImage();
     private final Image SandSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/sand.png").getImage();
-    private final Image EmptySprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/emptyCell.png").getImage();
+    private final Image StoneSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/stone.png").getImage();
+    private final Image LavaSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/lava.png").getImage();
+    private final Image WaterSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/water.png").getImage();
+    private final Image NothingSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/nothing.png").getImage();
 
-    private final int SpriteSize = EmptySprite.getWidth(this);
+    private final Image SelectedBorderSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/SelectedElement.png").getImage();
+
+    private final Image DebugSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/debug.png").getImage();
+
+    private final int SpriteSize = AirSprite.getWidth(this);
     private final int FieldWidth = SpriteSize * HORIZONTAL_CELLS;
     private final int FieldHeight = SpriteSize * VERTICAL_CELLS;
+    private Image SelectedElement = NothingSprite;
+    private boolean HasFieldbeenDrawn = false;
 
     private int clickedX;
     private int clickedY;
 
-    private final int OffsetY = SpriteSize * 2;
+    private final int OffsetY = (SCREEN_HEIGHT - FieldHeight) / 2;
     private final int OffsetX = (SCREEN_WIDTH - FieldWidth) / 2; //DOES: Cords for placing the grid in the middle of the screen
 
     private Graphics graphics;
@@ -45,15 +56,32 @@ public class Main extends JPanel {
     protected void paintComponent(Graphics graphics) {
         this.graphics = graphics;
         super.paintComponent(graphics);
-        graphics.setColor(Color.GRAY); // Hintergrund färben
+        graphics.setColor(Color.BLACK); // Hintergrund färben
         graphics.fillRect(0, 0, getWidth(), getHeight());
         initField();
+        DrawElementMenu();
+    }
+
+    private Main() {
+        HORIZONTAL_CELLS += 1;
+        VERTICAL_CELLS += 1;
+        if (PrintDebugInfo) {
+            System.out.println("    Debug info:      ");
+            System.out.println("    Screen width:" + SCREEN_WIDTH);
+            System.out.println("    Screen height: " + SCREEN_HEIGHT);
+            System.out.println("    Field width: " + FieldWidth);
+            System.out.println("    Field height: " + FieldHeight);
+            System.out.println("    Horizontal cells: " + HORIZONTAL_CELLS);
+            System.out.println("    Vertical cells: " + VERTICAL_CELLS);
+            System.out.println("    Sprite size: " + SpriteSize);
+            System.out.println("");
+
+        }
+
         initMouseListener();
     }
 
     private void initField() {
-        HORIZONTAL_CELLS += 1;
-        VERTICAL_CELLS += 1;
 
         //int firstCellPosY = (SCREEN_HEIGHT - FieldHeight) / 2;
         int y = 0;
@@ -63,7 +91,7 @@ public class Main extends JPanel {
                 y++;
                 x = 0;
             }
-            graphics.drawImage(EmptySprite, SpriteSize * x + OffsetX, SpriteSize * y + OffsetY, this);
+            graphics.drawImage(AirSprite, x * SpriteSize + OffsetX, y * SpriteSize + OffsetY, this);
             x++;
         }
 
@@ -73,29 +101,87 @@ public class Main extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                clickedX = e.getX();
-                clickedY = e.getY();
-                System.out.println(clickedX + ", " + clickedY);
+                if (PrintDebugInfo) {
+                    System.out.println("ClickedPos: " + e.getX() + ", " + e.getY());
+                }
 
-                int OffsetX = (SCREEN_WIDTH - FieldWidth) / 2; //DOES: Cords for placing the grid in the middle of the screen
-                //int firstCellPosY = (SCREEN_HEIGHT - FieldHeight) / 2;
-                int y = 0;
-                int x = 0;
+                FieldClickHandler(e.getX(), e.getY());
+                MenuClickHandler(e.getX(), e.getY());
+
+            }
+        });
+    }
+
+    private void FieldClickHandler(int ClickedX, int ClickedY) {
+        //int firstCellPosY = (SCREEN_HEIGHT - FieldHeight) / 2;
+        int y = 0;
+        int x = 0;
+        if (ClickedX > OffsetX && ClickedX < OffsetX + FieldWidth) { //DOES: Checks if the click is in the grid
+            if (ClickedY > OffsetY && ClickedY < OffsetY + FieldHeight) {//DOES:-------------------------------
                 for (int i = 0; i < HORIZONTAL_CELLS * VERTICAL_CELLS; i++) {
                     if (x >= HORIZONTAL_CELLS) {
                         y++;
                         x = 0;
                     }
-                    if (clickedX > x * SpriteSize + OffsetX && clickedX < (x * SpriteSize + OffsetX) + SpriteSize) {
-                        System.out.println("x: " + x);
-                        if (clickedY > (y * SpriteSize) + OffsetY && clickedY < ((y + 1) * SpriteSize) + OffsetY) {
-                            System.out.println("y: " + y);
+                    if (ClickedX > x * SpriteSize + OffsetX && ClickedX < (x * SpriteSize + OffsetX) + SpriteSize) {
+
+                        if (ClickedY > (y * SpriteSize) + OffsetY && ClickedY < ((y + 1) * SpriteSize) + OffsetY) {
+                            if (PrintDebugInfo) {
+                                System.out.println("ClickCell: " + y + ", " + x);
+                            }
                         }
                     }
                     x++;
                 }
 
             }
-        });
+        }
+
+    }
+
+    private void DrawElementMenu() {
+        int MenuOffsetX = 2;
+        graphics.drawImage(SandSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize, this);
+        graphics.drawImage(WaterSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * 3, this);
+        graphics.drawImage(LavaSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * 5, this);
+        graphics.drawImage(StoneSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * 7, this);
+        graphics.drawImage(AirSprite, OffsetX - SpriteSize * MenuOffsetX, OffsetY + SpriteSize * 9, this);
+
+        int SelectedBorderSpriteOffset = (SelectedBorderSprite.getWidth(this) - SpriteSize) / 2;
+        int[] SelectedBorderSpritePos = {(OffsetX - SpriteSize * 2) - SelectedBorderSpriteOffset, (OffsetY + SpriteSize * 11) - SelectedBorderSpriteOffset};
+        graphics.drawImage(SelectedBorderSprite, SelectedBorderSpritePos[0], SelectedBorderSpritePos[1], this);
+        graphics.drawImage(SelectedElement, OffsetX - SpriteSize * 2, OffsetY + SpriteSize * 11, this);
+    }
+
+    private void MenuClickHandler(int ClickedX, int ClickedY) {
+        int MenuOffsetX = 2;
+        if (ClickedX > OffsetX - SpriteSize * MenuOffsetX && ClickedX < (OffsetX - SpriteSize * MenuOffsetX) + SpriteSize) {
+
+            if (ClickedY > OffsetY + SpriteSize && ClickedY < OffsetY + SpriteSize * 2) {
+                System.out.println("Sand selected");
+                ShowSelectedElement(SandSprite);
+            }
+            if (ClickedY > OffsetY + SpriteSize * 3 && ClickedY < OffsetY + SpriteSize * 4) {
+                System.out.println("Water selected");
+                ShowSelectedElement(WaterSprite);
+            }
+            if (ClickedY > OffsetY + SpriteSize * 5 && ClickedY < OffsetY + SpriteSize * 6) {
+                System.out.println("Lava selected");
+                ShowSelectedElement(LavaSprite);
+            }
+            if (ClickedY > OffsetY + SpriteSize * 7 && ClickedY < OffsetY + SpriteSize * 8) {
+                System.out.println("Stone selected");
+                ShowSelectedElement(StoneSprite);
+            }
+            if (ClickedY > OffsetY + SpriteSize * 9 && ClickedY < OffsetY + SpriteSize * 10) {
+                System.out.println("Air selected");
+                ShowSelectedElement(NothingSprite);
+            }
+        }
+    }
+
+    private void ShowSelectedElement(Image SpriteOfElement) {
+        SelectedElement = SpriteOfElement;
+        repaint();
     }
 }
