@@ -21,17 +21,17 @@ public class Main extends JPanel {
 
     private final boolean PrintDebugInfo = true;
 
-    private final Image AirSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/emptyCell.png").getImage();
-    private final Image SandSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/sand.png").getImage();
-    private final Image StoneSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/stone.png").getImage();
-    private final Image LavaSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/lava.png").getImage();
-    private final Image WaterSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/water.png").getImage();
-    private final Image NothingSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/nothing.png").getImage();
-    private final Image ClearSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/clear.png").getImage();
+    private final Image AirSprite = new ImageIcon("src/main/resources/emptyCell.png").getImage();
+    private final Image SandSprite = new ImageIcon("src/main/resources/sand.png").getImage();
+    private final Image StoneSprite = new ImageIcon("src/main/resources/stone.png").getImage();
+    private final Image LavaSprite = new ImageIcon("src/main/resources/lava.png").getImage();
+    private final Image WaterSprite = new ImageIcon("src/main/resources/water.png").getImage();
+    private final Image NothingSprite = new ImageIcon("src/main/resources/nothing.png").getImage();
+    private final Image ClearSprite = new ImageIcon("src/main/resources/clear.png").getImage();
 
-    private final Image SelectedBorderSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/SelectedElement.png").getImage();
+    private final Image SelectedBorderSprite = new ImageIcon("src/main/resources/SelectedElement.png").getImage();
 
-    private final Image DebugSprite = new ImageIcon("/home/yasin/Documents/ScriptStuff/Projects/Java/JavaBox/src/main/resources/debug.png").getImage();
+    private final Image DebugSprite = new ImageIcon("src/main/resources/resources/debug.png").getImage();
 
     private final int SpriteSize = AirSprite.getWidth(this);
     private final int FieldWidth = SpriteSize * HORIZONTAL_CELLS;
